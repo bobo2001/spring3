@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>人员登陆</title>
+    <link rel="stylesheet" href="/js/easyui1.5/themes/icon.css">
+    <link rel="stylesheet" href="/js/easyui1.5/themes/default/easyui.css">
+
+    <script src="/js/easyui1.5/jquery.min.js"></script>
+    <script src="/js/easyui1.5/jquery.easyui.min.js"></script>
+    <script src="/js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+</head>
+<body>
+
+<div class="easyui-dialog" data-options="title:'登录',
+    buttons:[{
+     text:'登录',
+     iconCls:'icon-man',
+     handler:function(){
+       login();
+     }
+    },{
+      text:'注册',
+     iconCls:'icon-man',
+     handler:function(){
+       reg();
+       }
+    }]" style="width:500px;height:350px">
+    <center style="margin-top: 10%">
+        <form id="loginform" method="post">
+            <table>
+                <tr>
+                    <td>账号</td>
+                    <td>
+                        <input type="text" class="easyui-textbox" name="account" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>密码</td>
+                    <td>
+                        <input type="text" class="easyui-passwordbox" name="password" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>验证码</td>
+                    <td>
+                        <a href="javascript:login2()" class="easyui-linkbutton" data-options="iconCls:'icon-serch'">快捷登录</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </center>
+</div>
+</body>
+<script type="text/javascript">
+
+
+    function login2(){
+        window.location.href="/page/login2";
+    }
+
+
+    function login(){
+        $("#loginform").form("submit",{
+            url:'/login',
+            success:function(data){
+                data = JSON.parse(data);
+                if (data.code != 0) {
+                    $.messager.alert("提示",data.msg,"error")
+                }else{
+                    window.location.href="/page/show";
+                }
+            }
+        })
+
+    }
+</script>
+</html>

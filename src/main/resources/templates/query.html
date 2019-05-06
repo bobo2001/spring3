@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.springframework.org/schema/jdbc">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/js/easyui1.5/themes/icon.css">
+    <link rel="stylesheet" href="/js/easyui1.5/themes/default/easyui.css">
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/easyui1.5/jquery.min.js"></script>
+    <script src="/js/easyui1.5/jquery.easyui.min.js"></script>
+    <script src="/js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+    <script src="/js/uploadify/jquery.uploadify.js"></script>
+    <link rel="stylesheet" href="/js/uploadify/uploadify.css">
+</head>
+<div id="myDialog" class="easyui-dialog" data-options="closed:true" style="height: 500px;width: 800px">
+    <div id="toolbara">
+        <input type="text" id="commentss">
+        <input type="text" id="sratrcreatetime" class="easyui-datebox">→
+        <input type="text" id="endcreatetime" class="easyui-datebox">
+        <a href="javascript:openAdd();" class="easyui-linkbutton">新增</a>
+        <a href="javascript:search();" class="easyui-linkbutton">搜索</a>
+    </div>
+    <table id="pinglunTable"></table>
+</div>
+<!--评论新增-->
+<div id="addDialog" class="easyui-dialog" data-options="closed:true,buttons:[{
+    text:'保存',
+    handler:function(){
+      add();
+    }
+}]">
+    <form id="pinglunForm" method="post">
+        <table>
+            <tr>
+                <td>评论内容</td>
+                <td>
+                    <input type="text" name="comments" id="comments">
+                    <input type="text" style="display: none;" name="id">
+                </td>
+            </tr>
+            <tr>
+                <td>评论人</td>
+                <td><input type="text" name="commentsName"></td>
+            </tr>
+            <tr>
+                <td>评论等级</td>
+                <td>
+                    <input type="radio" value="1" name="commentsLevel">好
+                    <input type="radio" value="2" name="commentsLevel">一般
+                    <input type="radio" value="3" name="commentsLevel">差
+                </td>
+            </tr>
+            <tr>
+                <td>评论星</td>
+                <td>
+                    <input type="checkbox"  name="bb">
+                    <input type="checkbox"  name="bb">
+                    <input type="checkbox"  name="bb">
+                    <input type="checkbox"  name="bb">
+                    <input type="checkbox"  name="bb">
+                    (勾选一个表示一个数量)
+                    <input type="text" style="display: none;" id="count" name="commentsStars">
+                    <input type="text" style="display: none;" id="goodid" name="goodsid">
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<!--商品新增-->
+
+<div id="toolbar">
+    <a id="addBtn" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">新增</a>
+</div>
+<table id="goodTable"></table>
+<!--商品新增-->
+<div id="carDialog" class="easyui-dialog" data-options="closed:true,buttons:[{
+    text:'保存',
+    handler:function(){
+      saveCar();
+      }
+    },{
+   text:'关闭',
+   iconCls:'icon-cancel',
+   handler:function(){
+   closeCarDialog();
+   }
+}]">
+    <form id="pinglunForma" method="post">
+        <table>
+            <tr>
+                <td>商品名称</td>
+                <td>
+                    <input type="text" name="name" id="name">
+                </td>
+            </tr>
+            <tr>
+                <td>评论数量:</td>
+                <td>
+                    <input type="text" name="count" id="count1">
+                </td>
+            </tr>
+            <tr>
+                <td>商品图片</td>
+                <td><input type="file" id="butOne">
+                    <input type="hidden" id="imagea" name="imgsrc">
+                    <div id="showImgDiv" style="width: 150px;height: 150px;border-style:solid;border-width:1px; border-color:black;">
+                        <img src="" id="testimg" style="width: 150px;height: 150px;"/>
+                    </div>
+                    <div id="showBars"></div>
+                </td>
+            </tr>
+
+        </table>
+    </form>
+</div>
+</body>
+<script type="text/javascript" th:inline="none">
+    $(function(){0
+        initGoodsList();
+        // $("#carDialog").hidden;
+    })
+
+    //搜索
+    function search(){
+        var comments = $("#commentss").val();
+        var sratrcreatetime = $("#sratrcreatetime").datebox("getValue");
+        var endcreatetime = $("#endcreatetime").datebox("getValue");
+        $("#pinglunTable").datagrid("load",{
+            comments:comments,
+            sratrcreatetime:sratrcreatetime,
+            endcreatetime:endcreatetime
+        })
+    }
+
+
+    //打开新增
+    function openAdd(){
+        $("#addDialog").dialog("open");
+    }
+    //新增
+    function add(){
+        var arr = document.getElementsByName("bb");
+        var count = "";
+        for(var i=0;i<arr.length;i++){
+            if(arr[i].checked){
+                count++;
+            }
+        }
+        $("#count").val(count);
+        $("#pinglunForm").form("submit",{
+            url:'/saveComments',
+            method:'post',
+            success:function(data){
+                if(data){
+                    alert("成功")
+                    $("#addDialog").dialog("close");
+                    $("#pinglunTable").datagrid("reload")
+                }
+            }
+        })
+    }
+    //回显
+    function openupd(id){
+        var arr = document.getElementsByName("bb");
+        for(var i=0;i < arr.length;i++){
+            arr[i].checked=false;
+        }
+        $.ajax({
+            url:'/updhuixian',
+            type:'post',
+            data:{
+                id:id
+            },
+            dataType:"json",
+            success:function(data){
+                $("#pinglunForm").form("load",data)
+                var count = data.count;
+                var arr = document.getElementsByName("bb");
+                for(var i=0;i < count;i++){
+                    arr[i].checked=true;
+                }
+            }
+        })
+        $("#addDialog").dialog("open");
+    }
+
+    //商品分页
+    function initGoodsList(){
+        $("#goodTable").datagrid({
+            url:"/findGoods",
+            method:'post',
+            pagination:true,
+            toolbar:"#toolbar",
+            pageList:[1,2,3,4,5,6,7,8,9],
+            pageSize:3,
+            pageNumber:1,
+            fit:true,
+            columns:[[
+                {field:"check",checkbox:true},
+                /*{field:'id',title:'id'},*/
+                {field:'name',title:'商品名称'},
+                {field:'count',title:'评论数量'},
+                {field:'imgsrc',title:'商品图片',formatter:function(value,row,index){
+                        return '<img width="50px" height="50px" src="'+value+'">';
+                    }},
+                {field:'caozuo',title:'操作',formatter:function(value,row,index){
+                        return "<input type='button' value='查看评论' onclick='chakan(\""+row.id+"\")'>";
+                    }},
+            ]]
+        })
+    }
+
+    function   closeCarDialog(){
+        $("#carDialog").dialog('close');
+    }
+
+    /*商品新增*/
+    function  saveCar(){
+        $("#pinglunForma").form({
+            url:'/adduserList',
+            success:function(data){
+                if(data == 'true'){
+                    closeCarDialog();
+                    $("#goodTable").datagrid('reload');
+                }else{
+                    $.messager.alert('提示','新增失败','warning')
+                }
+            }
+        });
+        $('#pinglunForma').submit();
+    }
+    //新增
+    $("#addBtn").click(function(){
+        $("#pinglunForma").form('reset');
+        $("#carDialog").dialog({
+            title:'新增',
+            iconCle:'icon-add',
+            closed:false
+        });
+    })
+
+    //打开弹框查看
+    function chakan(id){
+        $("#goodid").val(id);
+        $("#myDialog").dialog("open");
+        initPinglunList(id);
+    }
+    //评论分页
+    function initPinglunList(id){
+        $("#pinglunTable").datagrid({
+            url:"/findComments?goodid="+id,
+            method:'post',
+            toolbar:"#toolbara",
+            pagination:true,
+            pageList:[1,2,3,4,5,6,7,8,9],
+            pageSize:3,
+            pageNumber:1,
+            fit:true,
+            columns:[[
+                {field:"check",checkbox:true},
+                /*{field:'id',title:'id'},*/
+                {field:'commentsName',title:'评论人'},
+                {field:'comments',title:'评论内容'},
+                {field:'commentsLevel',title:'评论等级',formatter:function(value,row,inde){
+                        return value == 1 ? "好" : value == 2 ? "一般" : "差"
+                    }},
+                {field:'commentsStars',title:'评论星',formatter:function(value,row,index){
+                        return value == 1 ? "☆" : value == 2 ? "☆☆" : value == 3 ? "☆☆☆" : value == 4 ? "☆☆☆☆" : "☆☆☆☆☆"
+                    }},
+                /*{field:'goodsid',title:'连表id'},*/
+                {field:'createtime',title:'时间'},
+                {field:'upd',title:'操作',formatter:function(value,row,index){
+                        return "<input type='button' value='修改' onclick='openupd(\""+row.id+"\")'>";
+                    }}
+            ]]
+        })
+    }
+
+
+    //文件域的id
+    $("#butOne").uploadify({
+        //前台请求后台的url 不可忽略的参数
+        'uploader': "../upload/upImg",
+        //插件自带 不可忽略的参数
+        'swf': "/js/uploadify/uploadify.swf",
+        //撤销按钮的图片路径
+        'cancelImg': "/js/uploadify/uploadify-cancel.png",
+        //如果为true 为自动上传 在文件后 为false 那么它就要我们自己手动点上传按钮
+        'auto': true,
+        //可以同时选择多个文件 默认为true 不可忽略
+        'multi': false,
+        //给上传按钮设置文字
+        'buttonText': "上传头像",
+        //上传后队列是否消失
+        'removeCompleted': true,
+        'removeTimeout': 1,
+        //上传文件的个数
+        'uploadLimit': 2,
+        'fileTypeExts': "*.jpg;*.jpge;*.gif;*.png",
+        'fileSizeLimit': "2MB",
+        //给div的进度条加背景 不可忽略
+        'queueID': "showBars",
+        // controller层方法中接收文件的参数名--------artImg
+        'fileObjName': "artImg",
+        //上传成功后的回调函数
+        'onUploadSuccess': function (file, data, response) {
+            $("#testimg").prop("src", data);
+            $("#imagea").val(data);
+        }
+    })
+</script>
+</html>

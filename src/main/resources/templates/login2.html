@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/js/easyui1.5/themes/icon.css">
+    <link rel="stylesheet" href="/js/easyui1.5/themes/default/easyui.css">
+    <link rel="stylesheet" href="/js/uploadify/uploadify.css">
+    <link rel="stylesheet" href="/js/kindeditor-4.1.10/themes/default/default.css">
+
+
+    <script src="/js/easyui1.5/jquery.min.js"></script>
+    <script src="/js/easyui1.5/jquery.easyui.min.js"></script>
+    <script src="/js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+    <script src="/js/kindeditor-4.1.10/kindeditor.js"></script>
+    <script src="/js/uploadify/jquery.uploadify.js"></script>
+</head>
+<body>
+<div class="easyui-dialog" data-options="width:330,height:200,closable:false,title:'系统登录',iconCls:'icon-tip',buttons:'#button'">
+    <form id="loginForm" method="post">
+        <table>
+            <tr>
+                <td>手机号</td>
+                <td>
+                    <input id="phoneNumber" class="easyui-textbox" name="account" data-options="required:true,iconCls:'icon-man'">
+                </td>
+            </tr>
+            <tr>
+                <td>验证码</td>
+                <td>
+                    <input class="easyui-textbox" name="messageCode" data-options="required:true">
+                    <a href="javascript:getMessage()" class="easyui-linkbutton">获取验证码</a>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div id="button">
+    <a href="javascript:messagelogin()" class="easyui-linkbutton" data-options="iconCls:'icon-ok'">登录</a>
+    <a href="javascript:toReg()" class="easyui-linkbutton" data-options="iconCls:'icon-redo'">注册</a>
+</div>
+
+
+
+
+</body>
+<script type="text/javascript">
+    function getMessage(){
+        var phoneNumber = $("#phoneNumber").textbox("getValue");
+        $.ajax({
+            url:"/gainMessgerCode",
+            type:"post",
+            data:{phoneNumber:phoneNumber},
+            success:function(data){
+                $.messager.alert("提示",data,"info");
+            }
+        })
+    }
+
+
+    function toReg(){
+        location.href="../reg.jsp";
+    }
+
+
+    //登录
+    function messagelogin(){
+        $("#loginForm").form("submit",{
+            url:"/messageLogin",
+            success:function(data){
+                $.messager.alert("提示",data,"info");
+                if(data=="登录成功"){
+                    location.href="/page/show";
+                }
+            }
+        })
+
+    }
+
+
+</script>
+</html>
